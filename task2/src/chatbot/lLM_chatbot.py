@@ -1,36 +1,34 @@
 import openai
 from task2.src.utils.vector_db import load_vector_db, retrieve_context
 
-# Load OpenAI API key from environment variable
-import os
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+openai.api_key = 'sk-proj-1irQpfPKBkkb9pyQRkAgT3BlbkFJ6UQ4pz7xPxDmshwpindO'  # Ensure the API key is set in the environment variables
 
-openai.api_key = OPENAI_API_KEY
+def get_chatbot_response(query):
+    vector_db = load_vector_db()
+    context = retrieve_context(query, vector_db)
+    try:
+        response = openai.Completion.create(
+            model="text-davinci-003",  # Switch to a lower-cost model
+            prompt=f"Context: {context}\n\nQ: {query}\nA:",
+            max_tokens=150
+        )
+        return response.choices[0].text.strip()
+    except openai.error.RateLimitError as e:
+        return f"Rate limit exceeded: {str(e)}"
+    except Exception as e:
+        return f"An error occurred: {str(e)}"
 
-def get_chatbot_response(user_query):
-    """Generate a response using OpenAI GPT-3.5 and the context retrieved from FAISS."""
-    index = load_vector_db()
-    context = retrieve_context(user_query, index)
-    
-    # Generate a response using the GPT-3.5 model
-    response = openai.Completion.create(
-        model="gpt-3.5-turbo",
-        prompt=f"Context: {context}\n\nUser Query: {user_query}\n\nResponse:",
-        max_tokens=150
-    )
-    
-    return response.choices[0].text.strip()
-
-def get_sales_agent_response(user_query):
-    """Generate a sales-oriented response using OpenAI GPT-3.5 and the context retrieved from FAISS."""
-    index = load_vector_db()
-    context = retrieve_context(user_query, index)
-    
-    # Generate a response with a sales focus
-    response = openai.Completion.create(
-        model="gpt-3.5-turbo",
-        prompt=f"Context: {context}\n\nUser Query: {user_query}\n\nAs a sales agent, respond to the query:",
-        max_tokens=150
-    )
-    
-    return response.choices[0].text.strip()
+def get_sales_agent_response(query):
+    vector_db = load_vector_db()
+    context = retrieve_context(query, vector_db)
+    try:
+        response = openai.Completion.create(
+            model="text-davinci-003",  # Switch to a lower-cost model
+            prompt=f"You are a sales agent. Context: {context}\n\nQ: {query}\nA:",
+            max_tokens=150
+        )
+        return response.choices[0].text.strip()
+    except openai.error.RateLimitError as e:
+        return f"Rate limit exceeded: {str(e)}"
+    except Exception as e:
+        return f"An error occurred: {str(e)}"

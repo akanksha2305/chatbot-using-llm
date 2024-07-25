@@ -1,16 +1,15 @@
-import PyPDF2
+import fitz  # PyMuPDF
 
 def extract_text_from_pdf(pdf_path):
-    with open(pdf_path, 'rb') as file:
-        reader = PyPDF2.PdfFileReader(file)
-        text = ""
-        for page_num in range(reader.numPages):
-            page = reader.getPage(page_num)
-            text += page.extract_text()
+    pdf_document = fitz.open(pdf_path)
+    text = ""
+    for page_num in range(len(pdf_document)):
+        page = pdf_document.load_page(page_num)
+        text += page.get_text()
     return text
 
 if __name__ == "__main__":
-    pdf_path = "task1/data/pdfs/Apple_Vision_Pro_Privacy_Overview.pdf"  # Replace with actual PDF file path
-    pdf_text = extract_text_from_pdf(pdf_path)
-    with open("task1/data/pdfs/pdf_text.txt", "w", encoding="utf-8") as file:
-        file.write(pdf_text)
+    pdf_path = "task1/data/pdfs/Apple_Vision_Pro_Privacy_Overview.pdf"
+    extracted_text = extract_text_from_pdf(pdf_path)
+    with open("task1/data/pdfs/extracted_text.txt", "w") as file:
+        file.write(extracted_text)
